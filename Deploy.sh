@@ -1339,7 +1339,6 @@ function main()
       then
         _PRINT_MSG "NOTE: ${RED}Xcode Command Line Tools from Apple not found!${OFF}"
         _tidy_exec "xcode-select --install" "Install Xcode Command Line Tools"
-        exit 1
     fi
 
     #

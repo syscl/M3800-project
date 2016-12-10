@@ -50,7 +50,7 @@ compile="${REPO}/DSDT/compile/"
 tools="${REPO}/tools/"
 raw="${REPO}/DSDT/raw"
 prepare="${REPO}/DSDT/prepare"
-config_plist="/Volumes/EFI/EFI/CLOVER/config.plist"
+config_plist="/Volumes/${gESP_real_name}/EFI/CLOVER/config.plist"
 EFI_INFO="${REPO}/DSDT/EFIINFO"
 gInstall_Repo="/usr/local/sbin/"
 gFrom="${REPO}/tools"
@@ -64,9 +64,9 @@ to_shell_sleep="/etc/sysclusbfix.sleep"
 to_shell_wake="/etc/sysclusbfix.wake"
 gRT_Config="/Applications/Wireless Network Utility.app"/${gMAC_adr}rfoff.rtl
 drivers64UEFI="${REPO}/CLOVER/drivers64UEFI"
-t_drivers64UEFI="/Volumes/EFI/EFI/CLOVER/drivers64UEFI"
+t_drivers64UEFI="/Volumes/${gESP_real_name}/EFI/CLOVER/drivers64UEFI"
 clover_tools="${REPO}/CLOVER/tools"
-t_clover_tools="/Volumes/EFI/EFI/CLOVER/tools"
+t_clover_tools="/Volumes/${gESP_real_name}/EFI/CLOVER/tools"
 
 #
 # Define variables.
@@ -873,14 +873,14 @@ function _find_acpi()
 
 function _update_clover()
 {
-    KEXT_DIR=/Volumes/EFI/EFI/CLOVER/kexts/${gOSVer}
+    KEXT_DIR=/Volumes/${gESP_real_name}/EFI/CLOVER/kexts/${gOSVer}
 
     #
     # Updating kexts. NOTE: This progress will remove any previous kexts.
     #
     _PRINT_MSG "--->: ${BLUE}Updating kexts...${OFF}"
     _tidy_exec "rm -rf ${KEXT_DIR}" "Remove pervious kexts in ${KEXT_DIR}"
-    _tidy_exec "cp -R ./CLOVER/kexts/${gOSVer} /Volumes/EFI/EFI/CLOVER/kexts/" "Update kexts from ./CLOVER/kexts/${gOSVer}"
+    _tidy_exec "cp -R ./CLOVER/kexts/${gOSVer} /Volumes/${gESP_real_name}/EFI/CLOVER/kexts/" "Update kexts from ./CLOVER/kexts/${gOSVer}"
     _tidy_exec "cp -R ./Kexts/*.kext ${KEXT_DIR}/" "Update kexts from ./Kexts"
 
     #
@@ -942,7 +942,7 @@ function _update_clover()
     #
     # Update CLOVERX64.efi
     #
-    _upd_EFI "${REPO}/CLOVER/CLOVERX64.efi" "/Volumes/EFI/EFI/CLOVER/CLOVERX64.efi"
+    _upd_EFI "${REPO}/CLOVER/CLOVERX64.efi" "/Volumes/${gESP_real_name}/EFI/CLOVER/CLOVERX64.efi"
 }
 
 #
@@ -951,15 +951,15 @@ function _update_clover()
 
 function _update_thm()
 {
-    if [ -d /Volumes/EFI/EFI/CLOVER/themes/bootcamp ];
+    if [ -d /Volumes/${gESP_real_name}/EFI/CLOVER/themes/bootcamp ];
       then
-        if [[ `cat /Volumes/EFI/EFI/CLOVER/themes/bootcamp/theme.plist` != *"syscl"* ]];
+        if [[ `cat /Volumes/${gESP_real_name}/EFI/CLOVER/themes/bootcamp/theme.plist` != *"syscl"* ]];
           then
             #
             # Yes we need to update themes.
             #
-            _del /Volumes/EFI/EFI/CLOVER/themes/bootcamp
-            cp -R ${REPO}/CLOVER/themes/BootCamp /Volumes/EFI/EFI/CLOVER/themes
+            _del /Volumes/${gESP_real_name}/EFI/CLOVER/themes/bootcamp
+            cp -R ${REPO}/CLOVER/themes/BootCamp /Volumes/${gESP_real_name}/EFI/CLOVER/themes
         fi
     fi
 }
@@ -1380,6 +1380,13 @@ function main()
     _tidy_exec "diskutil mount ${targetEFI}" "Mount ${targetEFI}"
 
     #
+    # PMheart - Detection for the name of ESP.
+    # Note: The name of ESP can not be 'EFI' absolutely.
+    # So we should use its real name instead of 'EFI'.
+    #
+    gESP_real_name=`diskutil list | grep ${targetEFI} | awk '{print $3;}'`
+
+    #
     # Ensure / Force Graphics card to power.
     #
     _initIntel
@@ -1388,9 +1395,9 @@ function main()
     #
     # Copy origin aml to raw.
     #
-    if [ -f /Volumes/EFI/EFI/CLOVER/ACPI/origin/DSDT.aml ];
+    if [ -f /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/origin/DSDT.aml ];
       then
-        _tidy_exec "cp /Volumes/EFI/EFI/CLOVER/ACPI/origin/DSDT.aml /Volumes/EFI/EFI/CLOVER/ACPI/origin/SSDT-*.aml "${decompile}"" "Copy untouch ACPI tables"
+        _tidy_exec "cp /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/origin/DSDT.aml /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/origin/SSDT-*.aml "${decompile}"" "Copy untouch ACPI tables"
       else
         _PRINT_MSG "NOTE: Warning!! DSDT and SSDTs doesn't exist! Press Fn+F4 under Clover to dump ACPI tables"
         # ERROR.
@@ -1535,8 +1542,8 @@ function main()
     #
     # Copy AML to destination place.
     #
-    _tidy_exec "_touch "/Volumes/EFI/EFI/CLOVER/ACPI/patched"" "Create /Volumes/EFI/EFI/CLOVER/ACPI/patched"
-    _tidy_exec "cp "${compile}"*.aml /Volumes/EFI/EFI/CLOVER/ACPI/patched" "Copy tables to /Volumes/EFI/EFI/CLOVER/ACPI/patched"
+    _tidy_exec "_touch "/Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/patched"" "Create /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/patched"
+    _tidy_exec "cp "${compile}"*.aml /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/patched" "Copy tables to /Volumes/${gESP_real_name}/EFI/CLOVER/ACPI/patched"
 
     #
     # Refresh kext in Clover.
@@ -1619,7 +1626,7 @@ function main()
     #
     # Clean up backup
     #
-    _del /Volumes/EFI/EFI/CLOVER/config.plistg
+    _del /Volumes/${gESP_real_name}/EFI/CLOVER/config.plistg
 
     _PRINT_MSG "NOTE: Congratulations! All operation has been completed"
     _PRINT_MSG "NOTE: Reboot now. Then enjoy your OS X! -${BOLD}syscl/lighting/Yating Zhou @PCBeta${OFF}"
